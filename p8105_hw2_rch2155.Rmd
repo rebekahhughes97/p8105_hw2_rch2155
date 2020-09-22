@@ -1,21 +1,42 @@
 ---
-title: "Simple document"
-output: html_document
+title: "p8105 Homework 2"
+author: Rebekah Hughes
+output: github_document
 ---
 
-I'm an R Markdown document! 
-
-# Section 1
-
-Here's a **code chunk** that samples from 
-a _normal distribution_:
+In the code chunk below, all the packages used in this homework are loaded.
 
 ```{r}
-samp = rnorm(100)
-length(samp)
+library(tidyverse)
+library(readxl)
 ```
 
-# Section 2
 
-I can take the mean of the sample, too!
-The mean is `r mean(samp)`.
+## Problem 1
+
+```{r}
+mrtrash_df = 
+  read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+  sheet = "Mr. Trash Wheel",
+  range = "A2:N408") %>%
+  janitor::clean_names() %>%
+  drop_na(dumpster)
+```
+
+```{r}
+precip_2017 =
+  read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+             sheet = "2017 Precipitation",
+             range = "A2:B14") %>% 
+  mutate(precip_year = 2017)
+
+precip_2018 =
+  read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+             sheet = "2018 Precipitation",
+             range = "A2:B14") %>% 
+  mutate(precip_year = 2018)
+
+
+```
+
+
