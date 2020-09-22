@@ -20,7 +20,9 @@ mrtrash_df =
   sheet = "Mr. Trash Wheel",
   range = "A2:N408") %>%
   janitor::clean_names() %>%
-  drop_na(dumpster)
+  drop_na(dumpster) %>% 
+  round(sports_balls, digits = 0) %>% 
+  as.integer()
 ```
 
 ```{r}
@@ -36,7 +38,14 @@ precip_2018 =
              range = "A2:B14") %>% 
   mutate(precip_year = 2018)
 
-
+precip_tidy =
+  bind_rows(precip_2017, precip_2018) %>% 
+  janitor::clean_names() %>% 
+  month.name (month)
 ```
 
+Key variables??
+
+`filter (mrtrash_df, year == 2017, median (sports_balls))`
+`sum (precip_2018$Total)`
 
