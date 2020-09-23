@@ -55,11 +55,50 @@ The above datasets used for problem 1 have the following numbers of observations
 nycsub_df = 
   read_csv ("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
   janitor::clean_names() %>%
-  select(line, station_name, station_latitude, station_longitude, route1, route2, route3, route4, route5, route6, route7, route8, route9, route10, route11, entry, vending, entrance_type, ada) %>%
-  mutate(recode(entry, YES = TRUE, NO = FALSE))
+  select(
+    line, station_name, station_latitude, station_longitude, route1, route2, route3,route4,
+    route5, route6, route7, route8, route9, route10, route11, entry, vending, entrance_type,
+    ada)%>%
+  mutate(entry = recode(entry, YES = TRUE, NO = FALSE))
 ```
 
-The above dataset contains the line, station name, routes 1-11, entry, vending and entrance type as character variables, station latitude and longitude as nunerical variables, and ADA compliance and the recoded entry variable as logical variables. So far to clean the data, clean names has been done, certain variables have been cut out of the dataset, and entry has been recoded as a logical variable. The dimensions of the dataset are `r nrow(nycsub_df)` rows by `r ncol(nycsub_df)` columns. The data is more tidy than what it was initally but could be made more tidy still.
+The above dataset contains the line, station name, routes 1-11, vending and entrance type as character variables, station latitude and longitude as nunerical variables, and ADA compliance and the recoded entry variable as logical variables. So far to clean the data, clean names has been done, certain variables have been cut out of the dataset, and entry has been recoded as a logical variable. The dimensions of the dataset are `r nrow(nycsub_df)` rows by `r ncol(nycsub_df)` columns. The data is more tidy than what it was initally but could be made more tidy still.
 
+The following code makes station name a distinct variable.
+
+```{r}
+distinct(nycsub_df, station_name, .keep_all = TRUE)
+```
+
+Using the above code, it can be determined that there are 356 distinct stations.
+
+The following code computes how many stations are ADA compliant.
+
+```{r}
+nycada_df =
+  nycsub_df %>% 
+  distinct(station_name, .keep_all = TRUE) %>% 
+  filter(ada == TRUE)
+nrow(nycada_df)
+```
+
+According to the output of the above code, there are 57 stations that are ADA compliant.
+
+The following code calculates the proportion of station entrances/exits without vending that allow entrance.
+
+```{r}
+nycsub_filt = 
+  nycsub_df %>%
+  filter(vending == "NO", entry == TRUE) %>%
+  mutate(proportion = entry / sum(entry))
+```
+
+According to the above code, the proportion of station entrances/exits without vending that allow entrance is about 0.0145 or 1.45%.
+
+The following code reformats route number and route name as distinct variables.
+
+```{r}
+distinct(nycsub_df, c(route1, route2, route3, route4, route5, route6, route7, route8, route9, route10, route11), .keep_all = TRUE)
+```
 
 
