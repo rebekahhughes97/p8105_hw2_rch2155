@@ -56,10 +56,10 @@ nycsub_df =
   read_csv ("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
   janitor::clean_names() %>%
   select(line, station_name, station_latitude, station_longitude, route1, route2, route3, route4, route5, route6, route7, route8, route9, route10, route11, entry, vending, entrance_type, ada) %>%
-  mutate(as.logical(entry))
+  mutate(recode(entry, YES = TRUE, NO = FALSE))
 ```
 
-
+The above dataset contains the line, station name, routes 1-11, entry, vending and entrance type as character variables, station latitude and longitude as nunerical variables, and ADA compliance and the recoded entry variable as logical variables. So far to clean the data, clean names has been done, certain variables have been cut out of the dataset, and entry has been recoded as a logical variable. The dimensions of the dataset are `r nrow(nycsub_df)` rows by `r ncol(nycsub_df)` columns. The data is more tidy than what it was initally but could be made more tidy still.
 
 
 
