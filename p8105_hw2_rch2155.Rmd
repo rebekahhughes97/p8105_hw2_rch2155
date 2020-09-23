@@ -14,6 +14,8 @@ library(readxl)
 
 ## Problem 1
 
+The following code reads and cleans the Mr. Trash Wheel dataset.
+
 ```{r}
 mrtrash_df = 
   read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
@@ -24,8 +26,7 @@ mrtrash_df =
   mutate (round (sports_balls, digits = 0), as.integer(sports_balls))
 ```
 
-
-
+The following code reads and cleans the Precipitation data for 2017 and 2018 and combines the datasets into one.
 
 ```{r}
 precip_2017 =
@@ -46,7 +47,5 @@ precip_tidy =
   mutate (month.name [month])
 ```
 
-Key variables??
+The above datasets used for problem 1 have the following numbers of observations: `r nrow(mrtrash_df)` for the Mr. Trash Wheel dataset; `r nrow(precip_2017)` for the 2017 Precipitation dataset; `r nrow(precip_2018)` for the 2018 Precipitation dataset; and `r nrow(precip_tidy)` for the combined precipitation dataset. The following are examples of key variables from the Mr. Trash Wheel dataset: the mean of weight is `r mean (mrtrash_df$weight_tons)` tons, with a maximum value of `r max(mrtrash_df$weight_tons)` tons and a minimum value of `r min(mrtrash_df$weight_tons)` tons; the mean amount of grocery bags is `r mean(mrtrash_df$grocery_bags)`; and the mean amount of cigarette butts are `r mean(mrtrash_df$cigarette_butts)`, with a maximum of `r max(mrtrash_df$cigarette_butts)` and a minimum of `r min(mrtrash_df$cigarette_butts)`. The following are examples of key variables from the combined precipitation dataset and the two individual precipitation datasets: the mean total rainfall across the two years is `r mean(precip_tidy$total)` inches; the mean total rainfall for 2017 alone is `r mean(precip_2017$Total)` inches; and the mean total rainfall for 2018 is `r mean(precip_2018$Total)` inches. The total precipitation in 2018 was `r sum (precip_2018$Total)` and the median number of sports balls in a dumpster in 2017 was `r median (mrtrash_df$sports_balls, "year" == 2017)`.
 
-`filter (mrtrash_df, year == 2017, median (sports_balls))`
-`sum (precip_2018$Total)`
