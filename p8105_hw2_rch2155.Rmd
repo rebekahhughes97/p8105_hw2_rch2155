@@ -98,7 +98,38 @@ According to the above code, the proportion of station entrances/exits without v
 The following code reformats route number and route name as distinct variables.
 
 ```{r}
-distinct(nycsub_df, c(route1, route2, route3, route4, route5, route6, route7, route8, route9, route10, route11), .keep_all = TRUE)
+nycsub_tidy =
+  nycsub_df %>%
+  pivot_longer(
+    route1:route11,
+    names_to = "route_name",
+    names_prefix = "route",
+    names_transform = mutate (route_number = as.character(route_number)),
+    values_to = "route_number"
+  )
+```
+
+
+## Problem 3
+
+```{r}
+pols_month_df =
+  read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>%
+  janitor::clean_names() %>%
+  separate(mon, c("year", "month", "day")) %>%
+  mutate(month = recode(month, c('01'="January", '02'="February", '03'="March", '04'="April", '05'="May", '06'="June", '07'="July", '08'="August", '09'="September", '10'="October", '11'="November", '12'="December"))) %>%
+  pivot_longer(
+    names_to = "president",
+    names_prefix = "prez") %>%
+    mutate(rm(day))
+```
+
+```{r}
+
+```
+
+```{r}
+
 ```
 
 
