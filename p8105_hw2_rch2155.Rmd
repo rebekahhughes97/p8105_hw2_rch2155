@@ -23,7 +23,7 @@ mrtrash_df =
   range = "A2:N408") %>%
   janitor::clean_names() %>%
   drop_na (dumpster) %>% 
-  mutate (round (sports_balls, digits = 0), as.integer(sports_balls))
+  mutate (sports_balls = round (sports_balls, digits = 0), sports_balls = as.integer(sports_balls))
 ```
 
 The following code reads and cleans the Precipitation data for 2017 and 2018 and combines the datasets into one.
@@ -49,6 +49,7 @@ precip_tidy =
 
 The above datasets used for problem 1 have the following numbers of observations: `r nrow(mrtrash_df)` for the Mr. Trash Wheel dataset; `r nrow(precip_2017)` for the 2017 Precipitation dataset; `r nrow(precip_2018)` for the 2018 Precipitation dataset; and `r nrow(precip_tidy)` for the combined precipitation dataset. The following are examples of key variables from the Mr. Trash Wheel dataset: the mean of weight is `r mean (mrtrash_df$weight_tons)` tons, with a maximum value of `r max(mrtrash_df$weight_tons)` tons and a minimum value of `r min(mrtrash_df$weight_tons)` tons; the mean amount of grocery bags is `r mean(mrtrash_df$grocery_bags)`; and the mean amount of cigarette butts are `r mean(mrtrash_df$cigarette_butts)`, with a maximum of `r max(mrtrash_df$cigarette_butts)` and a minimum of `r min(mrtrash_df$cigarette_butts)`. The following are examples of key variables from the combined precipitation dataset and the two individual precipitation datasets: the mean total rainfall across the two years is `r mean(precip_tidy$total)` inches; the mean total rainfall for 2017 alone is `r mean(precip_2017$Total)` inches; and the mean total rainfall for 2018 is `r mean(precip_2018$Total)` inches. The total precipitation in 2018 was `r sum (precip_2018$Total)` and the median number of sports balls in a dumpster in 2017 was `r median (mrtrash_df$sports_balls, "year" == 2017)`.
 
+
 ## Problem 2
 
 ```{r}
@@ -67,22 +68,25 @@ The above dataset contains the line, station name, routes 1-11, vending and entr
 The following code makes station name a distinct variable.
 
 ```{r}
-distinct(nycsub_df, station_name, .keep_all = TRUE)
+nycsub_dist =
+  nycsub_df %>% 
+  distinct(line, station_name) %>% 
+  count()
 ```
 
-Using the above code, it can be determined that there are 356 distinct stations.
+Using the above code, it can be determined that there are 465 distinct stations.
 
 The following code computes how many stations are ADA compliant.
 
 ```{r}
 nycada_df =
   nycsub_df %>% 
-  distinct(station_name, .keep_all = TRUE) %>% 
-  filter(ada == TRUE)
-nrow(nycada_df)
+  distinct(line, station_name, .keep_all = TRUE) %>% 
+  filter(ada == TRUE) %>% 
+  count()
 ```
 
-According to the output of the above code, there are 57 stations that are ADA compliant.
+According to the output of the above code, there are 84 stations that are ADA compliant.
 
 The following code calculates the proportion of station entrances/exits without vending that allow entrance.
 
@@ -100,14 +104,32 @@ The following code reformats route number and route name as distinct variables.
 ```{r}
 nycsub_tidy =
   nycsub_df %>%
+  mutate(route8 = as.character(route8), route9 = as.character(route9), route10 = as.character(route10), route11 = as.character(route11)) %>% 
   pivot_longer(
     route1:route11,
     names_to = "route_name",
     names_prefix = "route",
-    names_transform = mutate (route_number = as.character(route_number)),
     values_to = "route_number"
   )
+
+nyc_sub_a =
+  nycsub_tidy %>% 
+  distinct(line, station_name, .keep_all = TRUE) %>% 
+  filter(route_number == "A") %>% 
+  count()
 ```
+
+From the above code, it can be determined that 60 distinct stations serve the A train.
+
+```{r}
+nyc_sub_a_ada =
+  nycsub_tidy %>% 
+  distinct(line, station_name, .keep_all = TRUE) %>% 
+  filter(route_number == "A", ada == TRUE) %>% 
+  count()
+```
+
+Given the above code, it can be concluded that of the stations that serve the A train, only 17 are ADA compliant.
 
 
 ## Problem 3
@@ -117,19 +139,40 @@ pols_month_df =
   read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>%
   janitor::clean_names() %>%
   separate(mon, c("year", "month", "day")) %>%
-  mutate(month = recode(month, c('01'="January", '02'="February", '03'="March", '04'="April", '05'="May", '06'="June", '07'="July", '08'="August", '09'="September", '10'="October", '11'="November", '12'="December"))) %>%
+  mutate_at ("month"=recode('01'="Jan", '02'="Feb")) %>% 
+  mutate(month.name[month]) %>% 
   pivot_longer(
+    cols = starts_with("prez"),
     names_to = "president",
-    names_prefix = "prez") %>%
-    mutate(rm(day))
+    names_prefix = "prez_") %>%
+    select(-day)
 ```
 
 ```{r}
-
+sp_df =
+  read_csv("./data/fivethirtyeight_datasets/snp.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(date, c("month", "day", "year")) %>% 
+  mutate_at ("month"=recode('01'="Jan", '02'="Feb")) %>% 
+  select(-day) %>% 
+  arrange(year, month)
 ```
 
 ```{r}
-
+unemploy_df =
+  read_csv("./data/fivethirtyeight_datasets/unemployment.csv") %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+    jan:dec,
+    names_to = "month",
+    values_to = "unemploy_prop"
+  )
 ```
 
+```{r}
+fivethirtyeight_df =
+  left_join(pols_month_df, sp_df, by = "year") %>% 
+  left_join(unemploy_df, by = "year") %>% 
+  arrange(year)
+```
 
