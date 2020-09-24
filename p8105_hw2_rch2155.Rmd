@@ -23,31 +23,48 @@ mrtrash_df =
   range = "A2:N408") %>%
   janitor::clean_names() %>%
   drop_na (dumpster) %>% 
-  mutate (sports_balls = round (sports_balls, digits = 0), sports_balls = as.integer(sports_balls))
+  mutate (
+    sports_balls = round (sports_balls, digits = 0), 
+    sports_balls = as.integer(sports_balls))
 ```
 
-The following code reads and cleans the Precipitation data for 2017 and 2018 and combines the datasets into one.
+The following code reads and cleans the Precipitation data for 2017 and 2018.
 
 ```{r}
 precip_2017 =
   read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
              sheet = "2017 Precipitation",
              range = "A2:B14") %>% 
-  mutate(precip_year = 2017)
+  mutate(Year = 2017) %>% 
+  relocate(Year)
 
 precip_2018 =
   read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
              sheet = "2018 Precipitation",
              range = "A2:B14") %>% 
-  mutate(precip_year = 2018)
+  mutate(Year = 2018) %>% 
+  relocate(Year)
+```
+
+The next code chunk changes the month number to a month name variable and combines the precipitation datasets together.
+
+```{r}
+month_df =
+  tibble(
+    month = 1:12,
+    month_name = month.name
+  )
 
 precip_tidy =
   bind_rows(precip_2017, precip_2018) %>% 
-  janitor::clean_names() %>% 
-  mutate (month.name [month])
+  janitor::clean_names()
+
+precip_final =
+  left_join(precip_tidy, month_df, by = "month")
 ```
 
-The above datasets used for problem 1 have the following numbers of observations: `r nrow(mrtrash_df)` for the Mr. Trash Wheel dataset; `r nrow(precip_2017)` for the 2017 Precipitation dataset; `r nrow(precip_2018)` for the 2018 Precipitation dataset; and `r nrow(precip_tidy)` for the combined precipitation dataset. The following are examples of key variables from the Mr. Trash Wheel dataset: the mean of weight is `r mean (mrtrash_df$weight_tons)` tons, with a maximum value of `r max(mrtrash_df$weight_tons)` tons and a minimum value of `r min(mrtrash_df$weight_tons)` tons; the mean amount of grocery bags is `r mean(mrtrash_df$grocery_bags)`; and the mean amount of cigarette butts are `r mean(mrtrash_df$cigarette_butts)`, with a maximum of `r max(mrtrash_df$cigarette_butts)` and a minimum of `r min(mrtrash_df$cigarette_butts)`. The following are examples of key variables from the combined precipitation dataset and the two individual precipitation datasets: the mean total rainfall across the two years is `r mean(precip_tidy$total)` inches; the mean total rainfall for 2017 alone is `r mean(precip_2017$Total)` inches; and the mean total rainfall for 2018 is `r mean(precip_2018$Total)` inches. The total precipitation in 2018 was `r sum (precip_2018$Total)` and the median number of sports balls in a dumpster in 2017 was `r median (mrtrash_df$sports_balls, "year" == 2017)`.
+
+The above datasets used for problem 1 have the following numbers of observations: `r nrow(mrtrash_df)` for the Mr. Trash Wheel dataset; `r nrow(precip_2017)` for the 2017 Precipitation dataset; `r nrow(precip_2018)` for the 2018 Precipitation dataset; and `r nrow(precip_final)` for the combined precipitation dataset. The following are examples of key variables from the Mr. Trash Wheel dataset: the mean of weight is `r mean (mrtrash_df$weight_tons)` tons, with a maximum value of `r max(mrtrash_df$weight_tons)` tons and a minimum value of `r min(mrtrash_df$weight_tons)` tons; the mean volume is `r mean(mrtrash_df$volume_cubic_yards)`, with a maximum of `r max(mrtrash_df$volume_cubic_yards)` and a minimum of `r min(mrtrash_df$volume_cubic_yards)`; and the mean number of homes powered is `r mean(mrtrash_df$homes_powered`. The following are examples of key variables from the combined precipitation dataset and the two individual precipitation datasets: the mean total rainfall across the two years is `r mean(precip_final$total)` inches; the mean total rainfall for 2017 alone is `r mean(precip_2017$Total)` inches; and the mean total rainfall for 2018 is `r mean(precip_2018$Total)` inches. The total precipitation in 2018 was `r sum (precip_2018$Total)` and the median number of sports balls in a dumpster in 2017 was `r median (mrtrash_df$sports_balls, "year" == 2017)`.
 
 
 ## Problem 2
@@ -134,40 +151,55 @@ Given the above code, it can be concluded that of the stations that serve the A 
 
 ## Problem 3
 
+The following code chunk reads and cleans the National Politicians dataset.
+
 ```{r}
 pols_month_df =
   read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>%
   janitor::clean_names() %>%
   separate(mon, c("year", "month", "day")) %>%
-  mutate_at ("month"=recode('01'="Jan", '02'="Feb")) %>% 
-  mutate(month.name[month]) %>% 
   pivot_longer(
     cols = starts_with("prez"),
     names_to = "president",
     names_prefix = "prez_") %>%
     select(-day)
+
+month_df1 =
+  tibble(
+    month = 01:12,
+    month_name = month.name
+  )
+
+pols_final =
+  left_join(pols_month_df, month_df1, by = "month")
 ```
+
+The next code chunk reads and cleans the S&P dataset.
 
 ```{r}
 sp_df =
   read_csv("./data/fivethirtyeight_datasets/snp.csv") %>% 
   janitor::clean_names() %>% 
   separate(date, c("month", "day", "year")) %>% 
-  mutate_at ("month"=recode('01'="Jan", '02'="Feb")) %>% 
   select(-day) %>% 
   arrange(year, month)
 ```
+
+The following code chunk reads and tidies the Unemployment dataset.
 
 ```{r}
 unemploy_df =
   read_csv("./data/fivethirtyeight_datasets/unemployment.csv") %>% 
   janitor::clean_names() %>% 
+  mutate(year = as.character(year)) %>% 
   pivot_longer(
     jan:dec,
     names_to = "month",
     values_to = "unemploy_prop"
   )
 ```
+
+The next bit of code joins the above three datasets together to form the final dataset.
 
 ```{r}
 fivethirtyeight_df =
@@ -176,3 +208,4 @@ fivethirtyeight_df =
   arrange(year)
 ```
 
+The National Politician dataset contains data on the politicians in the US that are republican and democrat and contains the variables year, month, presidential party, and parties of senators and governors. The S&P dataset contains data regarding S&P's stock market index and contains the variables year, month and closing value. The unemployment dataset contains data on the percent of unemployment per month and contains the variables month, year and percent unemployed. The final joined dataset contains all the values of the three datasets but combines the years and months of each of the datasets. There are `r nrow(fivethirtyeight_df)` rows and `r ncol(fivethirtyeight_df)` columns in the final dataset. The range of years is from `r min(fivethirtyeight_df$year)` to `r max(fivethirtyeight_df$year)`. Key variables to note in the final dataset are the year and month, the presidential party in office, the unemployment percentages, and the closing value of the S&P index as an estimation of what the stock market looked like in general.
