@@ -111,16 +111,15 @@ nycada_df =
 
 According to the output of the above code, there are 84 stations that are ADA compliant.
 
-The following code calculates the proportion of station entrances/exits without vending that allow entrance.
+The following code limits the data to only when a station is without vending.
 
 ```{r}
 nycsub_filt = 
   nycsub_df %>%
-  filter(vending == "NO", entry == TRUE) %>%
-  mutate(proportion = entry / sum(entry))
+  filter(vending == "NO")
 ```
 
-According to the above code, the proportion of station entrances/exits without vending that allow entrance is about 0.0145 or 1.45%.
+In order to find the proportion of entrances without vending, the numerator would be `r sum(nycsub_filt$entry == "TRUE")` and denominator would be `r nrow(nycsub_filt)`. The proportion of entrances/exits without vending that allow entry is `r 63/183*100`%.
 
 The following code reformats route number and route name as distinct variables.
 
@@ -164,12 +163,8 @@ pols_month_df =
   read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>%
   janitor::clean_names() %>%
   separate(mon, c("year", "month", "day")) %>%
-  mutate(month = recode(month, '01'="1", '02'='2', '03'="3", '04'="4", '05'="5", '06'="6", '07'="7", '08'="8", '09'="9")) %>% 
-  pivot_longer(
-    cols = starts_with("prez"),
-    names_to = "president",
-    names_prefix = "prez_") %>%
-    select(-day)
+  mutate(month = recode(month, '01'="1", '02'='2', '03'="3", '04'="4", '05'="5", '06'="6", '07'="7", '08'="8", '09'="9")) %>%
+  select(-day)
 
 month_df1 =
   tibble(
