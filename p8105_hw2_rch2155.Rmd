@@ -68,7 +68,7 @@ precip_final =
 ```
 
 
-The above datasets used for problem 1 have the following numbers of observations: `r nrow(mrtrash_df)` for the Mr. Trash Wheel dataset; `r nrow(precip_2017)` for the 2017 Precipitation dataset; `r nrow(precip_2018)` for the 2018 Precipitation dataset; and `r nrow(precip_final)` for the combined precipitation dataset. The following are examples of key variables from the Mr. Trash Wheel dataset: the mean of weight is `r mean (mrtrash_df$weight_tons)` tons, with a maximum value of `r max(mrtrash_df$weight_tons)` tons and a minimum value of `r min(mrtrash_df$weight_tons)` tons; the mean volume is `r mean(mrtrash_df$volume_cubic_yards)`, with a maximum of `r max(mrtrash_df$volume_cubic_yards)` and a minimum of `r min(mrtrash_df$volume_cubic_yards)`; and the mean number of homes powered is `r mean(mrtrash_df$homes_powered)`. The following are examples of key variables from the combined precipitation dataset and the two individual precipitation datasets: the mean total rainfall across the two years is `r mean(precip_final$total)` inches; the mean total rainfall for 2017 alone is `r mean(precip_2017$Total)` inches; and the mean total rainfall for 2018 is `r mean(precip_2018$Total)` inches. The total precipitation in 2018 was `r sum (precip_2018$Total)` and the median number of sports balls in a dumpster in 2017 was `r median (mrtrash_df$sports_balls, "year" == 2017)`.
+The above datasets used for problem 1 have the following numbers of observations: `r nrow(mrtrash_df)` for the Mr. Trash Wheel dataset; `r nrow(precip_2017)` for the 2017 Precipitation dataset; `r nrow(precip_2018)` for the 2018 Precipitation dataset; and `r nrow(precip_final)` for the combined precipitation dataset. The following are examples of key variables from the Mr. Trash Wheel dataset: the mean of weight is `r mean (mrtrash_df$weight_tons)` tons, with a maximum value of `r max(mrtrash_df$weight_tons)` tons and a minimum value of `r min(mrtrash_df$weight_tons)` tons; the mean volume is `r mean(mrtrash_df$volume_cubic_yards)` cubic yards, with a maximum of `r max(mrtrash_df$volume_cubic_yards)` cubic yards and a minimum of `r min(mrtrash_df$volume_cubic_yards)` cubic yards; and the mean number of homes powered is `r mean(mrtrash_df$homes_powered)`. The following are examples of key variables from the combined precipitation dataset and the two individual precipitation datasets: the mean total rainfall across the two years is `r mean(precip_final$total)` inches; the mean total rainfall for 2017 alone is `r mean(precip_2017$Total)` inches; and the mean total rainfall for 2018 is `r mean(precip_2018$Total)` inches. The total precipitation in 2018 was `r sum (precip_2018$Total)` inches and the median number of sports balls in a dumpster in 2017 was `r median (mrtrash_df$sports_balls, "year" == 2017)`.
 
 
 ## Problem 2
@@ -158,13 +158,17 @@ Given the above code, it can be concluded that of the stations that serve the A 
 
 The following code chunk reads and cleans the National Politicians dataset and also changes the month number into a month name.
 
-```{r, message=FALSE}
+```{r, message = FALSE, warning = FALSE}
 pols_month_df =
   read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>%
   janitor::clean_names() %>%
   separate(mon, c("year", "month", "day")) %>%
-  mutate(month = recode(month, '01'="1", '02'='2', '03'="3", '04'="4", '05'="5", '06'="6", '07'="7", '08'="8", '09'="9")) %>%
-  select(-day)
+  mutate(month = recode(
+    month, '01'="1", '02'='2', '03'="3", '04'="4", '05'="5", '06'="6", '07'="7", '08'="8", '09'="9")) %>%
+  mutate(prez_gop = recode(
+    prez_gop, "1"="gop", "0"="dem")) %>% 
+  rename(president = prez_gop) %>% 
+  select(-prez_dem, -day)
 
 month_df1 =
   tibble(
